@@ -11,8 +11,8 @@ pd.options.display.max_rows = None
 reg = linear_model.Ridge(alpha=.5)
 
 #train test split (bringing in movie_dataframe3 from Movie DF Clean)
-X = movie_dataframe3[[col for col in movie_dataframe3.columns if col != 'Rating']]
-y = movie_dataframe3[['Rating']]
+X = df_final[[col for col in df_final.columns if col != 'Rating']]
+y = df_final[['Rating']]
 X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.33, random_state=2021)
 
