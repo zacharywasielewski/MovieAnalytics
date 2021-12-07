@@ -30,7 +30,7 @@ def end_time(start_time, df):
     run_time = dt.timedelta(seconds=end_time - start_time)
     print("{} Movies in {}".format(len(df), run_time))
 
-def create_df(genre_dict):
+def create_df(ratings, genre_dict):
     #is there a better way to do this?
     df = pd.DataFrame(columns = [
             #misc
@@ -263,5 +263,5 @@ if __name__ == "__main__":
     start_time = time.time()
     ratings = pd.read_csv('C:\\Users\\G672594\\Downloads\\letterboxd-zachwazowski\\ratings.csv')
     genre_dict = genre_dict_create()
-    df = create_df(genre_dict)
+    df = create_df(ratings, genre_dict)
     end_time(start_time, df)
