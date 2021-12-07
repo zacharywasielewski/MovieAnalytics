@@ -25,10 +25,10 @@ def g(var, n=1):
 def g_null(var):
     return(len([x for x in var if x != 1 and x != 2]))
     
-def end_time(start_time):
+def end_time(start_time, df):
     end_time = time.time()
     run_time = dt.timedelta(seconds=end_time - start_time)
-    print("Run Time: {}".format(run_time))
+    print("{} Movies in {}".format(len(df), run_time))
 
 def create_df(genre_dict):
     #is there a better way to do this?
@@ -36,6 +36,7 @@ def create_df(genre_dict):
             #misc
             'Movie', 'Release_Date', 'Watch_Date', 'Rating', 
             'Genres', 'Languages', 'Overview', 'Popularity', 'Vote_Avg', 
+            'Prod_Company', 'Budget', 'Revenue', 'RunTime', 'Keywords',
             #directors
             'Directors', 'Director_Males', 
             'Director_Females', 'Director_UnknownGender', 
@@ -116,10 +117,17 @@ def create_df(genre_dict):
             searchmovie_id = res.id
             language = res.original_language
 #            title = res.title
-            overview = res.overview
-            popularity = res.popularity
-            release_date = res.release_date
-            vote_average = res.vote_average
+            overview = Movie(searchmovie_id).details(movie_id=searchmovie_id).overview
+            popularity = Movie(searchmovie_id).details(movie_id=searchmovie_id).popularity
+            release_date = Movie(searchmovie_id).details(movie_id=searchmovie_id).release_date
+            vote_average = Movie(searchmovie_id).details(movie_id=searchmovie_id).vote_average
+            
+            #added
+            prod_companies = Movie(searchmovie_id).details(movie_id=searchmovie_id).production_companies
+            budget = Movie(searchmovie_id).details(movie_id=searchmovie_id).budget
+            rev = Movie(searchmovie_id).details(movie_id=searchmovie_id).revenue
+            runtime = Movie(searchmovie_id).details(movie_id=searchmovie_id).runtime
+            keywords = [x.name for x in Movie(searchmovie_id).details(movie_id=searchmovie_id).keywords.keywords]
             
             #Search for people from movie
             movie_credits = Movie(searchmovie_id).credits(movie_id=searchmovie_id)
@@ -224,14 +232,12 @@ def create_df(genre_dict):
                 cast_pop.append(cast_popularity)
             cast_pop_avg = np.sum(cast_pop)/len(cast_pop) if len(cast_pop) else None
             
-            ## add in production companies (add budget, etc)
-            movie_details = Movie(searchmovie_id).details(movie_id=searchmovie_id).production_companies
-            
             #appending the row to our DF
             df.loc[-1] = [
                     #misc
                     search_title, release_date, watch_date, rating, 
                     mapped_genres, language, overview, popularity, vote_average, 
+                    prod_companies, budget, rev, runtime, keywords,
                     #directing
                     dir_list, g(dir_gender, n=2), g(dir_gender, n=1), g_null(dir_gender), dir_pop_avg, dir_gender, 
                     #producing
@@ -258,4 +264,4 @@ if __name__ == "__main__":
     ratings = pd.read_csv('C:\\Users\\G672594\\Downloads\\letterboxd-zachwazowski\\ratings.csv')
     genre_dict = genre_dict_create()
     df = create_df(genre_dict)
-    end_time(start_time)
+    end_time(start_time, df)
