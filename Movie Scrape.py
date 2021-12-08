@@ -4,6 +4,9 @@ pd.options.display.max_rows = None
 import numpy as np
 import time
 import datetime as dt
+#parallelizing
+import multiprocessing as mp
+import pandas.util.testing as pdt
 
 from tmdbv3api import TMDb, Movie, Person, Genre
 tmdb = TMDb()
@@ -70,18 +73,18 @@ def create_df(ratings, cast_n=10):
             'Top_Cast_Females', 'Top_Cast_UnknownGender', 'Top_Cast_Genders'
             ])
     df['Movie'] = ratings['Name']
-    df['search_title'] = ratings['Name']
     df['search_year'] = ratings['Year']
     df['Watch_Date'] = ratings['Date']
     df['Rating'] = ratings['Rating']*2
-    df = df.set_index('Movie')
+#    df = df.set_index('Movie')
     return(df)
     
-def fill_df(df, genre_dict, cast_n=10):
+def fill_df(df, cast_n=10):
+    genre_dict = genre_dict_create()
     not_found = []
 
     for i in range(len(df)):
-        search_title = df.iloc[i]['search_title']
+        search_title = df.iloc[i]['Movie']
         search_year = df.iloc[i]['search_year']
         
         #remove tv show because they fail --need a more sophisticated fix
@@ -291,15 +294,29 @@ def fill_df(df, genre_dict, cast_n=10):
             df.at[df.index[i], 'Top_Cast_Genders'] = cast_gender
             
             #print to confirm finished -- delete
-            print("   Scraped!")
+            print("   Scraped {}".format(df.index[i]))
             
     print("\n\nMovies Not Found: {}".format(not_found))
     return(df)
 
 if __name__ == "__main__":
+    #single path
     start_time = time.time()
     ratings = pd.read_csv('C:\\Users\\G672594\\Downloads\\letterboxd-zachwazowski\\ratings.csv')
-    genre_dict = genre_dict_create()
     df = create_df(ratings)
-    df = fill_df(df, genre_dict)
+    df = fill_df(df)
     end_time(start_time, df)
+    
+#    #parallelize code -- slower?
+#    start_time = time.time()
+#    ratings = pd.read_csv('C:\\Users\\G672594\\Downloads\\letterboxd-zachwazowski\\ratings.csv')
+#    df = create_df(ratings)
+#    __spec__ = "ModuleSpec(name='builtins', loader=<class '_frozen_importlib.BuiltinImporter'>)" ##weird
+#    p = mp.Pool(processes=4)
+#    split_dfs = np.array_split(df,4)
+#    start_time = time.time()
+#    pool_results = p.map(fill_df, split_dfs)
+#    p.close()
+#    p.join()
+#    df = pd.concat(pool_results, axis=0)
+#    end_time(start_time, df)
