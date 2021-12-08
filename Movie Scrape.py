@@ -221,7 +221,7 @@ def fill_df(df, genre_dict, cast_n=10):
             #actors information
             cast = [credit for credit in movie_credits.cast]
             cast_list, cast_gender_list, cast_pop, cast_pop_avg = [], [], [], None
-            for member in cast[0:10]:
+            for member in cast[0:cast_n]:
                 cast_gender = member.gender
 #                cast_character = member.character
                 cast_name = member.name
@@ -283,7 +283,7 @@ def fill_df(df, genre_dict, cast_n=10):
             df.at[df.index[i], 'Cinematographer_Popularity_Avg'] = cin_pop_avg
             df.at[df.index[i], 'Cinematographer_Genders'] = cins_gender
             #cast
-            df.at[df.index[i], 'Top_10_Cast'] = cast_list
+            df.at[df.index[i], 'Top_{}_Cast'.format(cast_n)] = cast_list
             df.at[df.index[i], 'Top_Cast_Popularity_Avg'] = cast_pop_avg
             df.at[df.index[i], 'Top_Cast_Males'] = g(cast_gender_list, n=1)
             df.at[df.index[i], 'Top_Cast_Females'] = g(cast_gender_list, n=2)
