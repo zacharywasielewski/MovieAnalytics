@@ -34,7 +34,7 @@ if __name__ == "__main__":
     y_true = y_test['Rating']
     y_pred = y_test['pred']
     cm = metrics.confusion_matrix(y_true, y_pred)
-    df_cm = pd.DataFrame(cm, index = [i for i in "1234567890"],
-                      columns = [i for i in "1234567890"])
+    df_cm = pd.DataFrame(cm, index = [i for i in "123456789"],
+                      columns = [i for i in "123456789"])
     plt.figure(figsize = (10,7))
     sn.heatmap(df_cm, annot=True)

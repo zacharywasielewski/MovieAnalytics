@@ -38,6 +38,10 @@ def end_time(start_time, df):
     end_time = time.time()
     run_time = dt.timedelta(seconds=end_time - start_time)
     print("{} Movies in {}".format(len(df), run_time))
+    
+def process(df):
+    res = df.apply(fill_df, axis=1)
+    return res
 
 def create_df(ratings, cast_n=10):
     #is there a better way to do this?
@@ -132,7 +136,7 @@ def fill_df(df, cast_n=10):
             vote_average = Movie(searchmovie_id).details(movie_id=searchmovie_id).vote_average
             
             #added
-            prod_companies = Movie(searchmovie_id).details(movie_id=searchmovie_id).production_companies
+            prod_companies = [prod_co['name'] for prod_co in Movie(searchmovie_id).details(movie_id=searchmovie_id).production_companies]
             budget = Movie(searchmovie_id).details(movie_id=searchmovie_id).budget
             rev = Movie(searchmovie_id).details(movie_id=searchmovie_id).revenue
             runtime = Movie(searchmovie_id).details(movie_id=searchmovie_id).runtime
