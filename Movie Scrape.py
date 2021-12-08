@@ -13,6 +13,12 @@ movie = Movie()
 person = Person()
 genre = Genre()
 
+movie_title_map = {
+        'Lamb':'',
+        'Raw':'Grave',
+        'Star Wars':'Star Wars ' ## TEMPORARY BUG?
+        }
+
 def genre_dict_create():
     genre_dict = {}
     for i in genre.movie_list():
@@ -67,6 +73,7 @@ def create_df(ratings, genre_dict):
 
     for i in range(len(ratings)):
         search_title = ratings.iloc[i]['Name']
+        print_title = search_title
         search_year = ratings.iloc[i]['Year']
         watch_date = ratings.iloc[i]['Date']
         rating = ratings.iloc[i]['Rating']*2
@@ -74,21 +81,14 @@ def create_df(ratings, genre_dict):
         #remove tv show because they fail --need a more sophisticated fix
         if search_title == 'Squid Game': 
             continue
-        
-        #Lamb breaks because TMDB stores it as it's icelandic name
-        elif search_title == 'Lamb':
-            search_title = 'Dýrið'
-            print('Lamb (Dýrið)', search_year)
-            
-        #Raw breaks because TMDB stores it as it's French name
-        elif search_title == 'Raw':
-            search_title = 'Grave'
-            print('Raw (Grave)', search_year)
             
         else:
+            if search_title in movie_title_map.values():
+                search_title = movie_title_map[search_title]
             print(search_title, search_year)
             
-        search = movie.search(search_title) #search for movies by title
+        
+        search = movie.search(search_title.replace(' ', '')) #search for movies by title
         #find the first movie in the search that matches the release year
         res = None
         #search through all search results for the correct movie (by title and year)
@@ -235,7 +235,7 @@ def create_df(ratings, genre_dict):
             #appending the row to our DF
             df.loc[-1] = [
                     #misc
-                    search_title, release_date, watch_date, rating, 
+                    print_title, release_date, watch_date, rating, 
                     mapped_genres, language, overview, popularity, vote_average, 
                     prod_companies, budget, rev, runtime, keywords,
                     #directing
