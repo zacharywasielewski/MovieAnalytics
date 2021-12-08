@@ -89,7 +89,7 @@ def fill_df(df, genre_dict, cast_n=10):
             continue
             
         else:
-            if search_title in movie_title_map.values():
+            if search_title in movie_title_map.keys():
                 search_title = movie_title_map[search_title]
             print(search_title, search_year)
             
