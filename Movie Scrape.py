@@ -14,7 +14,7 @@ person = Person()
 genre = Genre()
 
 movie_title_map = {
-        'Lamb':'',
+        'Lamb':'Dýrið',
         'Raw':'Grave',
         'Star Wars':'Star Wars ' ## TEMPORARY BUG?
         }
@@ -36,13 +36,14 @@ def end_time(start_time, df):
     run_time = dt.timedelta(seconds=end_time - start_time)
     print("{} Movies in {}".format(len(df), run_time))
 
-def create_df(ratings, genre_dict):
+def create_df(ratings, cast_n=10):
     #is there a better way to do this?
     df = pd.DataFrame(columns = [
             #misc
-            'Movie', 'Release_Date', 'Watch_Date', 'Rating', 
-            'Genres', 'Languages', 'Overview', 'Popularity', 'Vote_Avg', 
-            'Prod_Company', 'Budget', 'Revenue', 'RunTime', 'Keywords',
+            'Movie', 'search_title', 'search_year', 'Release_Date', 
+            'Watch_Date', 'Rating', 'Genres', 'Languages', 'Overview', 
+            'Popularity', 'Vote_Avg', 'Prod_Company', 'Budget', 'Revenue', 
+            'RunTime', 'Keywords',
             #directors
             'Directors', 'Director_Males', 
             'Director_Females', 'Director_UnknownGender', 
@@ -65,18 +66,23 @@ def create_df(ratings, genre_dict):
             'Cinematographer_Females', 'Cinematographer_UnknownGender', 
             'Cinematographer_Popularity_Avg', 'Cinematographer_Genders',
             #cast
-            'Top_10_Cast', 'Top_Cast_Popularity_Avg', 'Top_Cast_Males', 
+            'Top_{}_Cast'.format(cast_n), 'Top_Cast_Popularity_Avg', 'Top_Cast_Males', 
             'Top_Cast_Females', 'Top_Cast_UnknownGender', 'Top_Cast_Genders'
             ])
+    df['Movie'] = ratings['Name']
+    df['search_title'] = ratings['Name']
+    df['search_year'] = ratings['Year']
+    df['Watch_Date'] = ratings['Date']
+    df['Rating'] = ratings['Rating']*2
+    df = df.set_index('Movie')
+    return(df)
     
+def fill_df(df, genre_dict, cast_n=10):
     not_found = []
 
-    for i in range(len(ratings)):
-        search_title = ratings.iloc[i]['Name']
-        print_title = search_title
-        search_year = ratings.iloc[i]['Year']
-        watch_date = ratings.iloc[i]['Date']
-        rating = ratings.iloc[i]['Rating']*2
+    for i in range(len(df)):
+        search_title = df.iloc[i]['search_title']
+        search_year = df.iloc[i]['search_year']
         
         #remove tv show because they fail --need a more sophisticated fix
         if search_title == 'Squid Game': 
@@ -88,7 +94,7 @@ def create_df(ratings, genre_dict):
             print(search_title, search_year)
             
         
-        search = movie.search(search_title.replace(' ', '')) #search for movies by title
+        search = movie.search(search_title) #search for movies by title
         #find the first movie in the search that matches the release year
         res = None
         #search through all search results for the correct movie (by title and year)
@@ -137,7 +143,6 @@ def create_df(ratings, genre_dict):
             dir_list, dir_gender, dir_pop, dir_pop_avg = [], [], [], None
             for director in directors:
                 director_gender = director.gender
-#                director_id = director.id
                 director_name = director.name
                 director_popularity = director.popularity
                 #append info to lists
@@ -153,7 +158,6 @@ def create_df(ratings, genre_dict):
             for producer in producers:
                 producer_name = producer.name
                 producer_gender = producer.gender
-#                producer_id = producer.id
                 producer_popularity = producer.popularity
                 #append info to lists
                 if producer_name not in prod_list:
@@ -177,7 +181,6 @@ def create_df(ratings, genre_dict):
                 writer_name = writer.name
                 if writer_name not in writers_list:
                     writer_gender = writer.gender
-#                    writer_id = writer.id
                     writer_popularity = writer.popularity
                     #append info to lists
                     writers_list.append(writer_name)
@@ -193,7 +196,6 @@ def create_df(ratings, genre_dict):
                 sound_name = sound.name
                 if sound_name not in sound_list:
                     sound_gender = sound.gender
-#                    sound_id = sound.id
                     sound_popularity = sound.popularity
                     #append info to lists
                     sound_list.append(sound_name)
@@ -209,7 +211,6 @@ def create_df(ratings, genre_dict):
                 cin_name = cin.name
                 if cin_name not in cin_list:
                     cin_gender = cin.gender
-#                    cin_id = cin.id
                     cin_popularity = cin.popularity
                     #append info to lists
                     cin_list.append(cin_name)
@@ -224,7 +225,6 @@ def create_df(ratings, genre_dict):
                 cast_gender = member.gender
 #                cast_character = member.character
                 cast_name = member.name
-#                cast_id = member.id
                 cast_popularity = member.popularity
 #                cast_order = member.order
                 cast_list.append(cast_name)
@@ -232,28 +232,65 @@ def create_df(ratings, genre_dict):
                 cast_pop.append(cast_popularity)
             cast_pop_avg = np.sum(cast_pop)/len(cast_pop) if len(cast_pop) else None
             
-            #appending the row to our DF
-            df.loc[-1] = [
-                    #misc
-                    print_title, release_date, watch_date, rating, 
-                    mapped_genres, language, overview, popularity, vote_average, 
-                    prod_companies, budget, rev, runtime, keywords,
-                    #directing
-                    dir_list, g(dir_gender, n=2), g(dir_gender, n=1), g_null(dir_gender), dir_pop_avg, dir_gender, 
-                    #producing
-                    prod_list, g(prod_gender, n=2), g(prod_gender, n=1), g_null(prod_gender), prod_pop_avg, prod_gender, 
-                    exec_prod_list, 
-                    #writing
-                    writers_list, g(writers_gender, n=2), g(writers_gender, n=1), g_null(writers_gender), writers_pop_avg, writers_gender, 
-                    novel_adapted, 
-                    #sound
-                    sound_list, g(sounds_gender, n=2), g(sounds_gender, n=1), g_null(sounds_gender), sound_pop_avg, sounds_gender, 
-                    #cinematography
-                    cin_list, g(cins_gender, n=2), g(cins_gender, n=1), g_null(cins_gender), cin_pop_avg, cins_gender, 
-                    #cast
-                    cast_list, cast_pop_avg, g(cast_gender_list, n=2), g(cast_gender_list, n=1), g_null(cast_gender_list), cast_gender_list
-                    ]
-            df.index = df.index + 1  # shifting index
+            #fill row
+            #misc
+            df.at[df.index[i], 'Release_Date'] = release_date
+            df.at[df.index[i], 'Genres'] = mapped_genres
+            df.at[df.index[i], 'Languages'] = language
+            df.at[df.index[i], 'Overview'] = overview
+            df.at[df.index[i], 'Popularity'] = popularity
+            df.at[df.index[i], 'Vote_Avg'] = vote_average
+            df.at[df.index[i], 'Prod_Company'] = prod_companies
+            df.at[df.index[i], 'Budget'] = budget
+            df.at[df.index[i], 'Revenue'] = rev
+            df.at[df.index[i], 'RunTime'] = runtime
+            df.at[df.index[i], 'Keywords'] = keywords
+            #directing
+            df.at[df.index[i], 'Directors'] = dir_list
+            df.at[df.index[i], 'Director_Males'] = g(dir_gender, n=2)
+            df.at[df.index[i], 'Director_Females'] = g(dir_gender, n=1)
+            df.at[df.index[i], 'Director_UnknownGender'] = g_null(dir_gender)
+            df.at[df.index[i], 'Director_Popularity_Avg'] = dir_pop_avg
+            df.at[df.index[i], 'Director_Genders'] = dir_gender
+            #producing
+            df.at[df.index[i], 'Producers'] = prod_list
+            df.at[df.index[i], 'Producer_Males'] = g(prod_gender, n=2)
+            df.at[df.index[i], 'Producer_Females'] = g(prod_gender, n=1)
+            df.at[df.index[i], 'Producer_UnknownGender'] = g_null(prod_gender)
+            df.at[df.index[i], 'Producer_Popularity_Avg'] = prod_pop_avg
+            df.at[df.index[i], 'Producer_Genders'] = prod_gender
+            df.at[df.index[i], 'Executive_Producers'] = exec_prod_list
+            #writing
+            df.at[df.index[i], 'Writers'] = writers_list
+            df.at[df.index[i], 'Writer_Males'] = g(writers_gender, n=2)
+            df.at[df.index[i], 'Writer_Females'] = g(writers_gender, n=1)
+            df.at[df.index[i], 'Writer_UnknownGender'] = g_null(writers_gender)
+            df.at[df.index[i], 'Writer_Popularity_Avg'] = writers_pop_avg
+            df.at[df.index[i], 'Writer_Genders'] = writers_gender
+            df.at[df.index[i], 'Novel_Adapted'] = novel_adapted
+            #sound
+            df.at[df.index[i], 'Composers'] = sound_list
+            df.at[df.index[i], 'Composer_Males'] = g(sounds_gender, n=2)
+            df.at[df.index[i], 'Composer_Females'] = g(sounds_gender, n=1)
+            df.at[df.index[i], 'Composer_UnknownGender'] = g_null(sounds_gender)
+            df.at[df.index[i], 'Composer_Popularity_Avg'] = sound_pop_avg
+            df.at[df.index[i], 'Composer_Genders'] = sounds_gender
+            #cinematography
+            df.at[df.index[i], 'Cinematographers'] = cin_list
+            df.at[df.index[i], 'Cinematographer_Males'] = g(cins_gender, n=2)
+            df.at[df.index[i], 'Cinematographer_Females'] = g(cins_gender, n=1)
+            df.at[df.index[i], 'Cinematographer_UnknownGender'] = g_null(cins_gender)
+            df.at[df.index[i], 'Cinematographer_Popularity_Avg'] = cin_pop_avg
+            df.at[df.index[i], 'Cinematographer_Genders'] = cins_gender
+            #cast
+            df.at[df.index[i], 'Top_10_Cast'] = cast_list
+            df.at[df.index[i], 'Top_Cast_Popularity_Avg'] = cast_pop_avg
+            df.at[df.index[i], 'Top_Cast_Males'] = g(cast_gender_list, n=1)
+            df.at[df.index[i], 'Top_Cast_Females'] = g(cast_gender_list, n=2)
+            df.at[df.index[i], 'Top_Cast_UnknownGender'] = g_null(cast_gender_list)
+            df.at[df.index[i], 'Top_Cast_Genders'] = cast_gender
+            
+            #print to confirm finished -- delete
             print("   Scraped!")
             
     print("\n\nMovies Not Found: {}".format(not_found))
@@ -263,5 +300,6 @@ if __name__ == "__main__":
     start_time = time.time()
     ratings = pd.read_csv('C:\\Users\\G672594\\Downloads\\letterboxd-zachwazowski\\ratings.csv')
     genre_dict = genre_dict_create()
-    df = create_df(ratings, genre_dict)
+    df = create_df(ratings)
+    df = fill_df(df, genre_dict)
     end_time(start_time, df)
