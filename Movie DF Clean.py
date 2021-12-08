@@ -3,7 +3,8 @@ import pandas as pd
 if __name__ == "__main__":
     #encode categorical variables
     dummy_cols = ['Languages','Genres','Directors','Producers','Executive_Producers',
-                  'Writers','Composers','Cinematographers','Top_10_Cast']
+                  'Writers','Composers','Cinematographers','Top_10_Cast', 'Keywords',
+                  'Prod_Company']
     df_dummy = df #pull movie_dataframe from other script
     for col in dummy_cols:
         s = df_dummy[col]
@@ -12,7 +13,7 @@ if __name__ == "__main__":
         df_dummy = df_dummy[[x for x in df_dummy.columns if x != col]]
     
     #subset encoded columns to only columns where sum >= 3
-    df_sum = df.sum(numeric_only = True)
+    df_sum = df_dummy.sum(numeric_only = True)
     df_rem_list = list(df_sum[df_sum < 3].index) 
     df_dummy_sub = df_dummy[[x for x in df_dummy.columns if x not in df_rem_list]]
     
