@@ -5,8 +5,8 @@ import numpy as np
 import time
 import datetime as dt
 #parallelizing
-import multiprocessing as mp
-import pandas.util.testing as pdt
+#import multiprocessing as mp
+#import pandas.util.testing as pdt
 
 from tmdbv3api import TMDb, Movie, Person, Genre
 tmdb = TMDb()
@@ -34,21 +34,25 @@ def g(var, n=1):
 def g_null(var):
     return(len([x for x in var if x != 1 and x != 2]))
     
-def end_time(start_time, df):
+def end_time(start_time, df, movie_count=True):
     end_time = time.time()
     run_time = dt.timedelta(seconds=end_time - start_time)
-    print("{} Movies in {}".format(len(df), run_time))
+    if movie_count==True:
+        print("{} Movies in {}".format(len(df), run_time))
+    else:
+        print("Run time so far: {}".format(run_time))
     
 def process(df):
     res = df.apply(fill_df, axis=1)
     return res
 
-def create_df(ratings, cast_n=10):
+def create_df(input_df, cast_n=10, input_name='ratings'):
     #is there a better way to do this?
     df = pd.DataFrame(columns = [
             #misc
-            'Movie', 'search_title', 'search_year', 'Release_Date', 
-            'Watch_Date', 'Rating', 'Genres', 'Languages', 'Overview', 
+            'Movie', 'Movie_ID', 'search_title', 'search_year', 'Release_Date', 
+            'Watch_Date', 
+            'Rating', 'Genres', 'Languages', 'Overview', 
             'Popularity', 'Vote_Avg', 'Prod_Company', 'Budget', 'Revenue', 
             'RunTime', 'Keywords',
             #directors
@@ -76,10 +80,17 @@ def create_df(ratings, cast_n=10):
             'Top_{}_Cast'.format(cast_n), 'Top_Cast_Popularity_Avg', 'Top_Cast_Males', 
             'Top_Cast_Females', 'Top_Cast_UnknownGender', 'Top_Cast_Genders'
             ])
-    df['Movie'] = ratings['Name']
-    df['search_year'] = ratings['Year']
-    df['Watch_Date'] = ratings['Date']
-    df['Rating'] = ratings['Rating']*2
+    
+    if input_name == 'ratings':
+        df['Movie'] = input_df['Name']
+        df['search_year'] = input_df['Year']
+        df['Watch_Date'] = input_df['Date']
+        df['Rating'] = input_df['Rating']*2
+    elif input_name == 'oscars':
+        df['Movie'] = input_df['Title']
+        df['search_year'] = input_df['Year']
+    else:
+        print("create_df function requires input_name='ratings' or input_name='oscars'")
 #    df = df.set_index('Movie')
     return(df)
     
@@ -98,7 +109,7 @@ def fill_df(df, cast_n=10):
         else:
             if search_title in movie_title_map.keys():
                 search_title = movie_title_map[search_title]
-            print(search_title, search_year)
+#            print(search_title, search_year)
             
         
         search = movie.search(search_title) #search for movies by title
@@ -241,6 +252,7 @@ def fill_df(df, cast_n=10):
             
             #fill row
             #misc
+            df.at[df.index[i], 'Movie_ID'] = searchmovie_id
             df.at[df.index[i], 'Release_Date'] = release_date
             df.at[df.index[i], 'Genres'] = mapped_genres
             df.at[df.index[i], 'Languages'] = language
@@ -298,7 +310,7 @@ def fill_df(df, cast_n=10):
             df.at[df.index[i], 'Top_Cast_Genders'] = cast_gender
             
             #print to confirm finished -- delete
-            print("   Scraped {}".format(df.index[i]))
+#            print("   Scraped {}".format(df.index[i]))
             
     print("\n\nMovies Not Found: {}".format(not_found))
     return(df)
