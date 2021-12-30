@@ -203,6 +203,7 @@ if __name__ == "__main__":
     start_time = time.time()
     oscars_df = create_df(oscars_dummied_df, input_name='oscars')
     oscars_df = fill_df(oscars_df)
+    oscars_df = oscars_df.loc[np.invert(oscars_df['Movie_ID'].isna())]
     end_time(start_time, oscars_df)
     ##4988 Movies in 0:40:16.947360
     ##try parallelized code!
