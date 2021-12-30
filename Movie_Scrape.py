@@ -50,7 +50,7 @@ def create_df(input_df, cast_n=10, input_name='ratings'):
     #is there a better way to do this?
     df = pd.DataFrame(columns = [
             #misc
-            'Movie', 'Movie_ID', 'search_title', 'search_year', 'Release_Date', 
+            'Movie', 'Movie_ID', 'search_year', 'Release_Date', 
             'Watch_Date', 
             'Rating', 'Genres', 'Languages', 'Overview', 
             'Popularity', 'Vote_Avg', 'Prod_Company', 'Budget', 'Revenue', 
