@@ -12,8 +12,7 @@ import pandas as pd
 from Movie_Scrape import end_time, create_df, fill_df
 import time
 import numpy as np
-
-from multiprocessing import Pool
+#from multiprocessing import Pool
 
 def create_oscars_df(start_year=1929, end_year=2030):
     awards_df = pd.DataFrame(columns=['Title', 'Year', 'Award', 'Winner'])
@@ -182,13 +181,13 @@ def create_wide_df(df):
     df3 = df2[[x for x in df2.columns if x != 'Winner']].groupby(['Title','Year'], as_index=False).max()
     return(df3)
     
-def parallelize_df(df, func, n_cores=4):
-    df_split = np.array_split(df, n_cores)
-    pool = Pool(n_cores)
-    df = pd.concat(pool.map(func, df_split))
-    pool.close()
-    pool.join()
-    return(df)
+#def parallelize_df(df, func, n_cores=4):
+#    df_split = np.array_split(df, n_cores)
+#    pool = Pool(n_cores)
+#    df = pd.concat(pool.map(func, df_split))
+#    pool.close()
+#    pool.join()
+#    return(df)
 
 if __name__ == "__main__":
     print("Scraping oscars movies from Oscars.org")
@@ -209,6 +208,7 @@ if __name__ == "__main__":
     ##try parallelized code!
     
     ##join Movie_ID to oscars award data
-    oscars_awards = oscars_dummied_df.merge(oscars_test[['Movie','Movie_ID']], left_on='Title', right_on='Movie', how='left')
+    ##duplicate issue!!
+    oscars_awards = oscars_dummied_df.merge(oscars_test[['Movie','search_year','Movie_ID']], left_on=['Title', 'Year'], right_on=['Movie','search_year'], how='left')
     oscars_awards = oscars_awards.loc[np.invert(oscars_awards.Movie_ID.isna())]
-    oscars_test = oscars_test.merge(oscars_awards[[x for x in oscars_awards.columns if x not in ['Title', 'Year', 'Movie']]], on='Movie_ID', how='left')
+    oscars_test = oscars_test.merge(oscars_awards[[x for x in oscars_awards.columns if x not in ['Title', 'Year', 'Movie']]], on=['Movie_ID', 'search_year'], how='left')
