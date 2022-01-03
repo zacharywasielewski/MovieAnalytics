@@ -191,7 +191,7 @@ def parallelize_df(df, func, n_cores=4):
     return(df)
 
 if __name__ == "__main__":
-    print("Scraping oscars movies from Oscars.org ...")
+    print("Scraping oscars movies from Oscars.org")
     start_time = time.time()
     awards_df = create_oscars_df()
     unique_df = awards_df[['Title','Year']].drop_duplicates()
@@ -199,11 +199,16 @@ if __name__ == "__main__":
     end_time(start_time, oscars_dummied_df, movie_count=False)
     
     ##straight path
-    print("Compiling TMDB movie data from oscars movies...")
+    print("Compiling TMDB movie data from oscars movies")
     start_time = time.time()
-    oscars_df = create_df(oscars_dummied_df, input_name='oscars')
-    oscars_df = fill_df(oscars_df)
-    oscars_df = oscars_df.loc[np.invert(oscars_df['Movie_ID'].isna())]
-    end_time(start_time, oscars_df)
+    oscars_test = create_df(oscars_dummied_df, input_name='oscars')
+    oscars_test = fill_df(oscars_test)
+    oscars_test = oscars_test.loc[np.invert(oscars_test['Movie_ID'].isna())]
+    end_time(start_time, oscars_test)
     ##4988 Movies in 0:40:16.947360
     ##try parallelized code!
+    
+    ##join Movie_ID to oscars award data
+    oscars_awards = oscars_dummied_df.merge(oscars_test[['Movie','Movie_ID']], left_on='Title', right_on='Movie', how='left')
+    oscars_awards = oscars_awards.loc[np.invert(oscars_awards.Movie_ID.isna())]
+    oscars_test = oscars_test.merge(oscars_awards[[x for x in oscars_awards.columns if x not in ['Title', 'Year', 'Movie']]], on='Movie_ID', how='left')

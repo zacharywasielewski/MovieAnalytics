@@ -46,7 +46,7 @@ def process(df):
     res = df.apply(fill_df, axis=1)
     return res
 
-def create_df(input_df, cast_n=10, input_name='ratings'):
+def create_df(input_df, input_name='ratings', cast_n=10):
     #is there a better way to do this?
     df = pd.DataFrame(columns = [
             #misc
@@ -317,6 +317,7 @@ def fill_df(df, cast_n=10):
 
 if __name__ == "__main__":
     #single path
+    print('Importing and compiling LetterBoxd movie data')
     start_time = time.time()
     ratings = pd.read_csv('C:\\Users\\G672594\\Downloads\\letterboxd-zachwazowski\\ratings.csv')
     df = create_df(ratings)
