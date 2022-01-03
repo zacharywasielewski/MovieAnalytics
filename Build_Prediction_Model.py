@@ -7,8 +7,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-pd.options.display.float_format = '{:,.0f}'.format
-
 def encode_categorical(df):
     #encode categorical variables
     dummy_cols = ['Languages','Genres','Directors','Producers','Executive_Producers',
@@ -43,9 +41,9 @@ def avg_impute_by_year(df, avg_df, col='Budget', scale=0.75):
     
     df2 = df.reset_index().merge(avg_df_group, how='left', on='search_year').set_index('Movie')
     df2.loc[df2[col] < 30000, col] = df2.loc[df2[col] < 30000]['{}_Avg'.format(col)]
-#    df2 = df2[[x for x in df2.columns if x != '{}_Avg'.format(col)]]
+    df2 = df2[[x for x in df2.columns if x != '{}_Avg'.format(col)]]
     
-    return(temp_df)
+    return(df2)
     
 def linear_impute(df, var_impute, var_dep, scale=0.50):
     m = np.linalg.lstsq(np.array(df[var_dep]).reshape(-1,1), np.array(df[var_impute]))[0][0]
