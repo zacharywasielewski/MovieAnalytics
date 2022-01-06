@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Dec 27 14:36:40 2021
-
-@author: G672594
-"""
-
 import urllib
 import re
 from bs4 import BeautifulSoup

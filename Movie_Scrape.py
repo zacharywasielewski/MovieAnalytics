@@ -7,7 +7,6 @@ import datetime as dt
 #parallelizing
 #import multiprocessing as mp
 #import pandas.util.testing as pdt
-
 from tmdbv3api import TMDb, Movie, Person, Genre
 tmdb = TMDb()
 tmdb.api_key = 'c1d4f524f44bb186d370d13f856915d5'
@@ -310,7 +309,7 @@ def fill_df(df, cast_n=10):
             df.at[df.index[i], 'Top_Cast_Genders'] = cast_gender
             
             #print to confirm finished -- delete
-#            print("   Scraped {}".format(df.index[i]))
+            #print("   Scraped {}".format(df.index[i]))
             
     print("\n\nMovies Not Found: {}".format(not_found))
     return(df)
